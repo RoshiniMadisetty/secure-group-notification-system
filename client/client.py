@@ -3,7 +3,7 @@ import ssl
 import threading
 from protocol.protocol import format_message, format_ack, parse_message
 
-HOST = "10.1.4.166"
+HOST = "10.1.16.175"
 PORT = 5000
 
 context = ssl.create_default_context()
