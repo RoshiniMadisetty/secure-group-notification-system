@@ -1,43 +1,43 @@
-# secure-group-notification-system
 # 🔐 Secure Reliable Group Notification System
 
 ## 📌 Overview
 
-This project implements a **secure and reliable group notification system** using low-level socket programming in Python. It follows a **client–server architecture** where a central server manages communication between multiple clients.
+This project implements a **secure and reliable group notification system** using Python socket programming. It follows a **client–server architecture** where multiple clients communicate through a central server.
 
-The system ensures:
+The system supports:
 
-* Reliable message delivery using **ACK-based protocol**
-* Secure communication using **TLS (SSL encryption)**
-* Support for **multiple concurrent clients**
+* Group-based messaging (A/B/C)
+* Reliable delivery using ACK mechanism
+* Secure communication using TLS
+* Multi-client and multi-device support
 
 ---
 
 ## 🚀 Features
 
 * Multi-client communication using TCP sockets
-* Custom message protocol (`MSG`, `ACK`, Message IDs)
-* Reliable delivery with acknowledgment tracking
-* TLS-based secure communication
+* Group-based notifications (no global broadcast)
+* Custom protocol (`JOIN`, `MSG`, `ACK`)
+* Reliable delivery with acknowledgments
+* TLS-based encrypted communication
 * Performance testing with simulated clients
-* Packet analysis using Wireshark
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-Client A       Client B       Client C
-    \             |             /
-     \            |            /
-          --------SERVER--------
-                 |
-          Message Broadcast
+Client A (Group A)     Client B (Group A)
+        \                  /
+         \                /
+             --- SERVER ---
+         /                \
+Client C (Group B)     Client D (Group B)
 ```
 
-* Clients connect to the server using TCP sockets
-* Server broadcasts messages to all connected clients
-* Clients send ACKs to confirm delivery
+* Clients join a group
+* Server stores group mappings
+* Messages are sent **only within the same group**
 
 ---
 
@@ -60,81 +60,68 @@ secure-group-notification-system
 │
 ├── security/
 │   ├── server.crt
-│   └── server.key
+│   └── server.key   (NOT pushed to GitHub)
 │
-├── docs/
+├── generate_cert.py
 └── README.md
 ```
 
 ---
 
-## ⚙️ Technologies Used
-
-* Python (Socket Programming)
-* TCP/IP Networking
-* SSL/TLS Encryption
-* Threading (Concurrency)
-* Wireshark (Network Analysis)
-
----
-
 ## 🔒 Protocol Design
 
-Message format:
+Message formats:
 
 ```
-MSG|<message_id>|<message>
-```
-
-Acknowledgment:
-
-```
-ACK|<message_id>
-```
-
-Example:
-
-```
-MSG|1|Hello team
+JOIN|A
+MSG|1|Hello
 ACK|1
 ```
 
----
-
-## 🛠️ Setup & Installation
-
-### 1. Clone the Repository
+Flow:
 
 ```
-git clone https://github.com/your-username/secure-group-notification-system.git
+Client joins group → sends message → server routes →
+clients receive → send ACK
+```
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone Repository
+
+```
+git clone https://github.com/RoshiniMadisetty/secure-group-notification-system.git
 cd secure-group-notification-system
 ```
 
 ---
 
-### 2. Generate TLS Certificate
-
-Run:
+### 2️⃣ Generate TLS Certificates (SERVER ONLY)
 
 ```
-openssl req -new -x509 -days 365 -nodes -out security/server.crt -keyout security/server.key
+python generate_cert.py
 ```
 
-Press Enter for all prompts.
+This creates:
+
+```
+security/server.crt
+security/server.key
+```
 
 ---
 
-## ▶️ How to Run
+## 🌐 Running on SAME SYSTEM
 
-### Step 1: Start Server
+### Start Server
 
 ```
 python -m server.server
 ```
 
----
-
-### Step 2: Start Clients (Open multiple terminals)
+### Start Clients
 
 ```
 python -m client.client
@@ -142,10 +129,59 @@ python -m client.client
 
 ---
 
-### Step 3: Send Messages
+## 🌍 Running on MULTIPLE SYSTEMS (IMPORTANT)
 
-Type messages in any client terminal.
-Other clients will receive notifications.
+### 🖥️ Step 1: On SERVER Laptop
+
+Edit `server/server.py`:
+
+```
+HOST = "0.0.0.0"
+PORT = 5000
+```
+
+Run:
+
+```
+python -m server.server
+```
+
+Find server IP:
+
+```
+ipconfig
+```
+
+Example:
+
+```
+IPv4 Address: 10.1.4.166
+```
+
+---
+
+### 💻 Step 2: On CLIENT Laptop
+
+Edit `client/client.py`:
+
+```
+HOST = "10.1.4.166"
+PORT = 5000
+```
+
+Run:
+
+```
+python -m client.client
+```
+
+---
+
+### ⚠️ Requirements
+
+* Both systems must be on the **same WiFi network**
+* Allow Python through **Windows Firewall**
+* Server must run **before clients**
 
 ---
 
@@ -157,32 +193,38 @@ Run:
 python -m performance.test_clients
 ```
 
-This simulates multiple clients connecting to the server.
+Simulates multiple clients connecting to server.
 
 ---
 
-## 📡 Network Analysis
+## 🔍 Network Verification
 
-Network communication was analyzed using Wireshark to verify:
+Traffic can be analyzed using Wireshark:
 
-* TCP packet exchange
-* Message transmission
-* TLS encryption (encrypted payload visibility)
-
----
-
-## 📈 Evaluation Metrics
-
-* Latency (response time)
-* Throughput (messages/sec)
-* Scalability (number of clients handled)
+* Without TLS → messages visible
+* With TLS → encrypted packets (TLS Application Data)
 
 ---
 
+## 🔐 Security Notes
+
+* TLS encryption ensures secure communication
+* `server.key` is **private and not shared**
+* Clients currently skip certificate verification for simplicity
+
+---
+
+## ⚠️ Limitations
+
+* No authentication system
+* Certificate verification disabled on client
+* Works within same network (LAN)
+
+---
 
 
 ## 📌 Conclusion
 
-This project demonstrates key networking concepts including **socket programming, secure communication, concurrency, and reliable data transfer**, making it a strong foundation for distributed systems and backend development.
+This project demonstrates key networking concepts including **socket programming, secure communication, concurrency, and reliable group-based messaging**, making it a strong foundation for distributed systems.
 
 ---
