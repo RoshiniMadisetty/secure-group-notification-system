@@ -155,7 +155,7 @@ ipconfig
 Example:
 
 ```
-IPv4 Address: 10.1.4.166
+IPv4 Address: 10.45.5.6
 ```
 
 ---
@@ -165,7 +165,7 @@ IPv4 Address: 10.1.4.166
 Edit `client/client.py`:
 
 ```
-HOST = "10.1.4.166"
+HOST = "10.45.5.6"
 PORT = 5000
 ```
 
@@ -194,15 +194,6 @@ python -m performance.test_clients
 ```
 
 Simulates multiple clients connecting to server.
-
----
-
-## 🔍 Network Verification
-
-Traffic can be analyzed using Wireshark:
-
-* Without TLS → messages visible
-* With TLS → encrypted packets (TLS Application Data)
 
 ---
 
