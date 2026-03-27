@@ -3,7 +3,7 @@ import ssl
 import threading
 from protocol.protocol import format_message, format_ack, parse_message
 
-HOST = "127.0.0.1"
+HOST = "10.1.4.166"
 PORT = 5000
 
 context = ssl.create_default_context()
@@ -17,7 +17,9 @@ client.connect((HOST, PORT))
 
 msg_id = 1
 
-
+group = input("Enter group (A/B/C): ")
+join_msg = f"JOIN|{group}"
+client.send(join_msg.encode())
 def receive_messages():
     while True:
         try:
