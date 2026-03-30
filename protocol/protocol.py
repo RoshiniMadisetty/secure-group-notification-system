@@ -1,23 +1,22 @@
-def format_message(msg_id, message):
-    return f"MSG|{msg_id}|{message}"
+def create_msg(seq, group, data):
+    return f"MSG|{seq}|{group}|{data}"
 
-def format_ack(msg_id):
-    return f"ACK|{msg_id}"
+def create_ack(seq):
+    return f"ACK|{seq}"
 
-def format_join(group):
+def create_join(group):
     return f"JOIN|{group}"
 
-def parse_message(data):
-    parts = data.split("|")
+def parse_message(msg):
+    parts = msg.split("|")
 
-    if len(parts) < 2:
-        return None, None, None
+    if parts[0] == "MSG":
+        return ("MSG", int(parts[1]), parts[2], parts[3])
 
-    msg_type = parts[0]
-    field = parts[1]
+    elif parts[0] == "ACK":
+        return ("ACK", int(parts[1]), None, None)
 
-    content = None
-    if len(parts) > 2:
-        content = "|".join(parts[2:])
+    elif parts[0] == "JOIN":
+        return ("JOIN", None, parts[1], None)
 
-    return msg_type, field, content
+    return None, None, None, None

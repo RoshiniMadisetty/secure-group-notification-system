@@ -1,51 +1,59 @@
 import socket
-import ssl
-import threading
-from protocol.protocol import format_message, format_ack, parse_message
+import time
+from protocol.protocol import create_msg, create_ack, create_join, parse_message
 
-HOST = "10.1.16.175"
+HOST = "127.0.0.1"   # change for multi-device
 PORT = 5000
 
-context = ssl.create_default_context()
-context.check_hostname = False
-context.verify_mode = ssl.CERT_NONE
+client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+client.settimeout(2)
 
-raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client = context.wrap_socket(raw_socket, server_hostname="localhost")
+group = input("Enter group (A/B): ")
+client.sendto(create_join(group).encode(), (HOST, PORT))
 
-client.connect((HOST, PORT))
+seq = 0
 
-msg_id = 1
+def send_message():
+    global seq
 
-group = input("Enter group (A/B/C): ")
-join_msg = f"JOIN|{group}"
-client.send(join_msg.encode())
-def receive_messages():
+    while True:
+        msg = input("You: ")
+        seq += 1
+
+        packet = create_msg(seq, group, msg).encode()
+
+        # 🔁 RETRANSMISSION LOGIC
+        while True:
+            client.sendto(packet, (HOST, PORT))
+
+            try:
+                data, _ = client.recvfrom(1024)
+                mtype, ack_seq, _, _ = parse_message(data.decode())
+
+                if mtype == "ACK" and ack_seq == seq:
+                    print(f"[ACK RECEIVED for {seq}]")
+                    break
+
+            except socket.timeout:
+                print("[RETRY] No ACK, resending...")
+
+def receive():
     while True:
         try:
-            data = client.recv(1024).decode()
+            data, _ = client.recvfrom(1024)
+            mtype, seq_num, grp, content = parse_message(data.decode())
 
-            if not data:
-                break
+            if mtype == "MSG":
+                print(f"\n[GROUP {grp}] {content}")
 
-            msg_type, received_id, content = parse_message(data)
-
-            if msg_type == "MSG":
-                print(f"\nNotification: {content}")
-
-                ack = format_ack(received_id)
-                client.send(ack.encode())
+                # Send ACK
+                ack = create_ack(seq_num)
+                client.sendto(ack.encode(), (HOST, PORT))
 
         except:
-            break
+            pass
 
 
-thread = threading.Thread(target=receive_messages)
-thread.daemon = True
-thread.start()
-
-while True:
-    message = input("Enter message: ")
-    formatted = format_message(msg_id, message)
-    client.send(formatted.encode())
-    msg_id += 1
+import threading
+threading.Thread(target=receive, daemon=True).start()
+send_message()
