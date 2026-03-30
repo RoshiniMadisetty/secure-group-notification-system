@@ -3,7 +3,8 @@ from protocol.protocol import parse_message
 
 HOST = "0.0.0.0"
 PORT = 5000
-
+import random
+LOSS_PROBABILITY = 0.3   # 30% packets lost
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server.bind((HOST, PORT))
 
@@ -35,8 +36,14 @@ while True:
         # Send to all in same group
         for client in groups.get(group, []):
             if client != addr:
-                server.sendto(data, client)
+                if random.random() > LOSS_PROBABILITY:
+                    server.sendto(data, client)
+                else:
+                    print("[LOSS] Packet dropped")
 
         # Send ACK
         ack = f"ACK|{seq}".encode()
-        server.sendto(ack, addr)
+        if random.random() > LOSS_PROBABILITY:
+            server.sendto(ack, addr)
+        else:
+            print("[LOSS] ACK dropped")
