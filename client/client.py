@@ -23,7 +23,7 @@ seq = 0
 # Performance tracking
 start_time = None
 message_count = 0
-TOTAL_MESSAGES = 5   # for demo
+TOTAL_MESSAGES = 5  
 
 
 # 📥 RECEIVE THREAD
