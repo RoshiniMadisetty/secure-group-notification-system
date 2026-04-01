@@ -9,7 +9,7 @@ PORT = 5000
 
 # Create UDP socket
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-client.settimeout(2)   # ⏱ timeout for ACK
+client.settimeout(2)   # timeout for ACK
 
 # Join group
 group = input("Enter group (A/B): ")
