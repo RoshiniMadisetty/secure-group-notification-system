@@ -3,7 +3,7 @@ import time
 import threading
 from protocol.protocol import create_msg, create_ack, create_join, parse_message
 
-# 🔧 CHANGE THIS FOR MULTI-DEVICE
+#  CHANGE THIS FOR MULTI-DEVICE
 HOST = "127.0.0.1"   # Replace with server IP (e.g., "10.1.4.166")
 PORT = 5000
 
@@ -26,7 +26,7 @@ message_count = 0
 TOTAL_MESSAGES = 5  
 
 
-# 📥 RECEIVE THREAD
+#  RECEIVE THREAD
 def receive_messages():
     while True:
         try:
@@ -46,7 +46,7 @@ def receive_messages():
             pass
 
 
-# 📤 SEND FUNCTION (WITH RETRANSMISSION)
+# SEND FUNCTION (WITH RETRANSMISSION)
 def send_messages():
     global seq, start_time, message_count
 
@@ -71,7 +71,7 @@ def send_messages():
 
                     message_count += 1
 
-                    # ⏱ Performance measurement
+                    # Performance measurement
                     if message_count == TOTAL_MESSAGES:
                         end_time = time.time()
                         print(f"\n⏱ Time for {TOTAL_MESSAGES} messages: {end_time - start_time:.2f} sec")
